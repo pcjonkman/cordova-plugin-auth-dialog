@@ -159,16 +159,16 @@ CredentialsViewController * credentialsViewController;
 {
     
     // TODO consider using UIAlertController (available starting from iOS 8.0)
-    UIAlertView* view = [[UIAlertView alloc] initWithTitle:@"Authentication Required"
-                       message: uri
-                      delegate: self
-             cancelButtonTitle:@"Cancel"
-             otherButtonTitles:nil];
+    UIAlertView* view = [[UIAlertView alloc] initWithTitle:@"Autorisatie vereist"
+                                                   message:@""
+                                                  delegate: self
+                                         cancelButtonTitle:@"Annuleren"
+                                         otherButtonTitles:nil];
     
     view.alertViewStyle = UIAlertViewStyleLoginAndPasswordInput;
     [view textFieldAtIndex:0].text = userName;
     
-    [view addButtonWithTitle:@"Log In"];
+    [view addButtonWithTitle:@"Inloggen"];
     
     [view show];
 }
