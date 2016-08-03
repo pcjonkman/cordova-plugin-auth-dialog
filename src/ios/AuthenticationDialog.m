@@ -142,7 +142,7 @@ CredentialsViewController * credentialsViewController;
                 }
             };
             
-            [credentialsViewController requestUserCredentials:self.uri];
+            [credentialsViewController requestUserCredentials:self.uri withUsername:self.userName];
         }
     }
     else
@@ -155,7 +155,7 @@ CredentialsViewController * credentialsViewController;
 
 @implementation CredentialsViewController {}
 
-- (void) requestUserCredentials: (NSString*) uri
+- (void)requestUserCredentials:(NSString*)uri withUsername:(NSString *)userName
 {
     
     // TODO consider using UIAlertController (available starting from iOS 8.0)
@@ -166,6 +166,7 @@ CredentialsViewController * credentialsViewController;
              otherButtonTitles:nil];
     
     view.alertViewStyle = UIAlertViewStyleLoginAndPasswordInput;
+    [view textFieldAtIndex:0].text = userName;
     
     [view addButtonWithTitle:@"Log In"];
     
@@ -184,6 +185,12 @@ CredentialsViewController * credentialsViewController;
     UITextField *password = [alertView textFieldAtIndex:1];
     
     self.onResult(username.text, password.text, false);
+}
+
+- (void)didPresentAlertView:(UIAlertView *)alertView
+{
+    //show keyboard on iOS 8
+    //[[alertView textFieldAtIndex:1] performSelector:@selector(becomeFirstResponder) withObject:nil afterDelay:0];
 }
 
 @end
