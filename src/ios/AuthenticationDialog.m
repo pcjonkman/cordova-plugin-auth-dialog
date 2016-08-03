@@ -123,7 +123,7 @@ CredentialsViewController * credentialsViewController;
             
             [[challenge sender] useCredential:[NSURLCredential credentialWithUser:self.userName
                                                                          password:self.password
-                                                                      persistence:NSURLCredentialPersistencePermanent]
+                                                                      persistence:NSURLCredentialPersistenceForSession]
                    forAuthenticationChallenge:challenge];
         } else { // request credentials
             credentialsViewController = [[CredentialsViewController alloc] init];
@@ -137,7 +137,7 @@ CredentialsViewController * credentialsViewController;
                 } else {
                     [[challenge sender] useCredential:[NSURLCredential credentialWithUser:userName
                                                                                  password:password
-                                                                              persistence:NSURLCredentialPersistencePermanent]
+                                                                              persistence:NSURLCredentialPersistenceForSession]
                            forAuthenticationChallenge:challenge];
                 }
             };
