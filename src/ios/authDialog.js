@@ -25,6 +25,12 @@ function authenticateOnce (uri, successCallback, errorCallback, userName, passwo
     cordova.exec(successCallback, errorCallback, 'AuthDialog', 'authenticate', [uri, userName, password, allowBypassAuth]);
 }
 
+authDialog.clearCredentials = function(successCallback, errorCallback) {
+    errorCallback = errorCallback || function() {};
+    successCallback = successCallback || function() {};
+    cordova.exec(successCallback, errorCallback, 'AuthDialog', 'clearCredentials', []);
+}
+
 authDialog.authenticate = function (uri, /*optional*/ successCallback, /*optional*/ errorCallback,  /*optional*/ userName,  /*optional*/ password,  /*optional*/ maxAttempts) {
     
     if (!uri) {

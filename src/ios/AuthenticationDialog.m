@@ -13,23 +13,56 @@
     self.userName = [command.arguments objectAtIndex:1];
     self.password = [command.arguments objectAtIndex:2];
     self.allowBypassAuth = [[command.arguments objectAtIndex:3] boolValue];
-
+    
     self.callbackId = command.callbackId;
-
+    
     NSLog(@"AuthDialog: authenticate %@", self.uri);
-
+    
+    [self credentialStorage:NO];
+    
     // large timout is used so that we have enough time to request user name and password
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:self.uri]
-                                             cachePolicy:NSURLRequestUseProtocolCachePolicy
-                                         timeoutInterval:60000.0];
-
+                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
+                                                       timeoutInterval:60000.0];
+    
     // use HEAD since it is faster than actial data retrieving (GET)
     // this does not work due to WebView issue: http://stackoverflow.com/questions/25755555/stream-is-sending-an-event-before-being-opened
     //[request setHTTPMethod:@"HEAD"];
-
+    
     [request setHTTPMethod:@"GET"];
-
+    
     [NSURLConnection  connectionWithRequest:request delegate:self];
+}
+
+-(void)credentialStorage:(bool)remove
+{
+    NSLog(@"AuthDialog: credentialStorage");
+    
+    NSDictionary* credentialsDict = [[NSURLCredentialStorage sharedCredentialStorage] allCredentials];
+    
+    for (NSURLProtectionSpace* protectionSpace in credentialsDict){
+        NSDictionary* userNameDict = credentialsDict[protectionSpace];
+        for (NSString* userName in userNameDict){
+            NSLog(@"AuthDialog: credential: %@", userName);
+            
+            if (remove == YES) {
+                NSLog(@"AuthDialog: credential: remove: %@", userName);
+                NSURLCredential* credential = userNameDict[userName];
+                [[NSURLCredentialStorage sharedCredentialStorage] removeCredential:credential forProtectionSpace:protectionSpace];
+            }
+        }
+    }
+    
+    [[NSURLCache sharedURLCache] removeAllCachedResponses];
+}
+
+-(void)clearCredentials:(CDVInvokedUrlCommand*) command
+{
+    NSLog(@"AuthDialog: clearCredentials");
+    
+    [self credentialStorage:YES];
+    
+    [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
@@ -39,7 +72,7 @@
     } else {
         errorResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
     }
-
+    
     [self.commandDelegate sendPluginResult:errorResult callbackId:self.callbackId];
 }
 
@@ -56,16 +89,16 @@
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:
                         [NSHTTPURLResponse localizedStringForStatusCode: statusCode]];
     }
-
+    
     [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
 
 - (BOOL) isSupportedAuthMethod:(NSString*)authenticationMethod {
     // TODO extend to others
     return [authenticationMethod isEqualToString:NSURLAuthenticationMethodNTLM] ||
-        [authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPBasic] ||
-        [authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPDigest];
-
+    [authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPBasic] ||
+    [authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPDigest];
+    
 }
 
 CredentialsViewController * credentialsViewController;
@@ -73,7 +106,7 @@ CredentialsViewController * credentialsViewController;
 - (void)connection:(NSURLConnection *)connection willSendRequestForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     NSLog(@"AuthDialog: willSendRequestForAuthenticationChallenge %@", challenge.protectionSpace);
- 
+    
     // if no credentials are passed during first authentication attempt then
     // try to pass challenge automatically (using cached credentials)
     // this makes it possible to avoid passing credentials every app start
@@ -84,31 +117,31 @@ CredentialsViewController * credentialsViewController;
     
     if ([challenge previousFailureCount] == 0 && [self isSupportedAuthMethod: challenge.protectionSpace.authenticationMethod])
     {
-
+        
         // use predefined credentials if provided
         if (![self.userName isEqual:[NSNull null]] && ![self.password isEqual:[NSNull null]]) {
-                
+            
             [[challenge sender] useCredential:[NSURLCredential credentialWithUser:self.userName
-                                                                             password:self.password
+                                                                         password:self.password
                                                                       persistence:NSURLCredentialPersistencePermanent]
-                       forAuthenticationChallenge:challenge];
+                   forAuthenticationChallenge:challenge];
         } else { // request credentials
             credentialsViewController = [[CredentialsViewController alloc] init];
-                
+            
             credentialsViewController.onResult = ^(NSString * userName, NSString* password, BOOL isCancelled)  {
-                    
+                
                 credentialsViewController = NULL;
-                    
+                
                 if (isCancelled) {
                     [[challenge sender] cancelAuthenticationChallenge:challenge];
                 } else {
                     [[challenge sender] useCredential:[NSURLCredential credentialWithUser:userName
-                                                                                     password:password
-                                                                                  persistence:NSURLCredentialPersistencePermanent]
-                            forAuthenticationChallenge:challenge];
+                                                                                 password:password
+                                                                              persistence:NSURLCredentialPersistencePermanent]
+                           forAuthenticationChallenge:challenge];
                 }
             };
-                
+            
             [credentialsViewController requestUserCredentials:self.uri];
         }
     }
@@ -149,7 +182,7 @@ CredentialsViewController * credentialsViewController;
     
     UITextField *username = [alertView textFieldAtIndex:0];
     UITextField *password = [alertView textFieldAtIndex:1];
-
+    
     self.onResult(username.text, password.text, false);
 }
 
