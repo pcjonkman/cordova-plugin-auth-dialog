@@ -1,0 +1,29 @@
+{
+  "name": "AuthenticationDialogSupport",
+  "version": "1.0.0",
+  "description": "Adds support for authentication dialogs into Apache Cordova",
+  "cordova": {
+    "id": "com.msopentech.authdialog",
+    "platforms": [
+      "ios",
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pcjonkman/cordova-plugin-auth-dialog.git"
+  },
+  "keywords": [
+    "cordova",
+    "mindef",
+    "authentication",
+    "cordova-ios"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.5"
+    }
+  ],
+  "author": "P. Jonkman"
+}
